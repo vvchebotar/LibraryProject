@@ -1,0 +1,28 @@
+`bdlibraryphoenix` - имя базы данных
+
+
+`books_table` - имя таблицы бд книг
+
+SELECT `books_table`.`ID`,
+    `books_table`.`Name`,
+    `books_table`.`Author`,
+    `books_table`.`Publication_date`,
+    `books_table`.`Date_of_receipt`,
+    `books_table`.`Short_description`,
+    `books_table`.`Number_of_pages`
+FROM `bdlibraryphoenix`.`books_table`;
+
+
+`user_table` - имя таблицы бд юзеров
+
+SELECT `user_table`.`id`,
+    `user_table`.`Login`,
+    `user_table`.`Password`,
+    `user_table`.`Administrator`,
+    `user_table`.`Registration_date`,
+    `user_table`.`Name`,
+    `user_table`.`Last_name`,
+    `user_table`.`Age`,
+    `user_table`.`Gender`,
+    `user_table`.`Favorite_books_bdname`
+FROM `bdlibraryphoenix`.`user_table`;
