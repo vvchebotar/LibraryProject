@@ -1,5 +1,4 @@
 /build/*
-/WebContent/WEB-INF/lib/*
-/WebContent/META-INF/*
 /.settings/*
-/.project
+/.idea/
+/LibraryWebApp.iml
