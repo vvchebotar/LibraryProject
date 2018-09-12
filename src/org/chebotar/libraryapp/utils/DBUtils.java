@@ -1,5 +1,9 @@
 package org.chebotar.libraryapp.utils;
- 
+
+import org.chebotar.libraryapp.beans.Book;
+import org.chebotar.libraryapp.beans.User;
+
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -7,270 +11,224 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import org.chebotar.libraryapp.beans.Book;
-import org.chebotar.libraryapp.beans.UserAccount;
- 
 public class DBUtils {
-	
-	public static List<UserAccount> queryUserList(Connection conn) throws SQLException {
-	      String sql = "Select a.id, a.Login, a.Password, a.Administrator, a.Registration_date, a.Name, a.Last_name, a.Age, a.Gender, a.Favorite_books_bdname from user_table a ";
-	 
-	      PreparedStatement pstm = conn.prepareStatement(sql);
-	 
-	      ResultSet rs = pstm.executeQuery();
-	      List<UserAccount> list = new ArrayList<UserAccount>();
-	      while (rs.next()) {
 
-	    	  UserAccount user = new UserAccount();
-	    	  
-	    	  user.setId(rs.getString("id"));
-	    	  user.setUserName(rs.getString("Login"));
-	    	  user.setPassword(rs.getString("Password"));
-	    	  user.setAdministrator(rs.getString("Administrator"));    	  
-	    	  user.setRegistrationDate(rs.getLong("Registration_date"));
-	    	  user.setName(rs.getString("Name"));
-	    	  user.setLastName(rs.getString("Last_name"));
-	    	  user.setBirthday(rs.getLong("Age"));
-	    	  user.setGender(rs.getString("Gender"));
-	    	            
-	          list.add(user);
-	      }
-	      return list;
-	}
-	
-	public static UserAccount findUser(Connection conn, String userName, String password) throws SQLException {
- 
-      String sql = "Select a.id, a.Login, a.Password, a.Administrator, "
-      		+ "a.Registration_date, a.Name, a.Last_name, a.Age,  a.Gender,  a.Favorite_books_bdname from user_table a "
-      		+ "where a.Login = ? and a.Password= ?";
- 
-      PreparedStatement pstm = conn.prepareStatement(sql);
-      pstm.setString(1, userName);
-      pstm.setString(2, password);
-      ResultSet rs = pstm.executeQuery();
- 
-      if (rs.next()) {
-    	  String id = rs.getString("id");
-    	  String administrator = rs.getString("Administrator");    	  
-    	  int registrationDate = rs.getInt("Registration_date");
-    	  String name = rs.getString("Name");
-    	  String lastName = rs.getString("Last_name");
-    	  long birthday = rs.getLong("Age");
-          String gender = rs.getString("Gender");
-          String favoriteBooksBdName = rs.getString("Favorite_books_bdname");          
-          
-          UserAccount user = new UserAccount();
-          user.setId(id);
-          user.setUserName(userName);
-          user.setPassword(password);          
-          user.setAdministrator(administrator);
-          user.setRegistrationDate(registrationDate);
-          user.setName(name);
-          user.setLastName(lastName);
-          user.setBirthday(birthday);
-          user.setGender(gender);
-          user.setFavoriteBooksBdName(favoriteBooksBdName);
-          
-          return user;
-      }
-      return null;
-  }
-	
-	public static UserAccount findUser(Connection conn, String id) throws SQLException {
-	  
-      String sql = "Select a.Login, a.Password, a.Administrator, "
-        		+ "a.Registration_date, a.Name, a.Last_name, a.Age,  a.Gender,  a.Favorite_books_bdname from user_table a "
-          		+ "where a.id = ?";
- 
-      PreparedStatement pstm = conn.prepareStatement(sql);
-      pstm.setString(1, id);
-      ResultSet rs = pstm.executeQuery();
- 
-      if (rs.next()) {    	  
-    	  String userName = rs.getString("Login");
-    	  String password = rs.getString("Password");
-    	  String administrator = rs.getString("Administrator");    	  
-    	  int registrationDate = rs.getInt("Registration_date");
-    	  String name = rs.getString("Name");
-    	  String lastName = rs.getString("Last_name");
-    	  long birthday = rs.getLong("Age");
-          String gender = rs.getString("Gender");
-          String favoriteBooksBdName = rs.getString("Favorite_books_bdname");
-          
-          
-          UserAccount user = new UserAccount();
-          user.setId(id);
-          user.setUserName(userName);
-          user.setPassword(password);          
-          user.setAdministrator(administrator);
-          user.setRegistrationDate(registrationDate);
-          user.setName(name);
-          user.setLastName(lastName);
-          user.setBirthday(birthday);
-          user.setGender(gender);
-          user.setFavoriteBooksBdName(favoriteBooksBdName);
-          
-          return user;
-      }
-      return null;
-  }
-  
-	public static void addUser(Connection conn, UserAccount user) throws SQLException {
-		  
-		  String sql = "Select a.Login from user_table a where a.Login=?";		  
-		  PreparedStatement pstm = conn.prepareStatement(sql);
-	      pstm.setString(1, user.getUserName());	      
-	      ResultSet rs = pstm.executeQuery();
-	      
-	      boolean isUserExist = false;
-	      
-	      if (rs.next()) {
-	    	  isUserExist = true;	  
-	      }
-	      
-	      if(isUserExist){
-	    	  sql = "Update user_table a set a.Password=?, a.Name=?, a.Last_name=?, a.Age=?, a.Gender=? where a.Login=?";
-	    	  pstm = conn.prepareStatement(sql);
-			  pstm.setString(1, user.getPassword());
-			  pstm.setString(2, user.getName());
-			  pstm.setString(3, user.getLastName());
-			  pstm.setString(4, String.valueOf(user.getBirthday().toEpochDay()));
-			  pstm.setString(5, user.getGender());
-		      pstm.setString(6, user.getUserName());
-		      pstm.executeUpdate();
-		      
-	      } else {
-	    	  pstm.close();
-	    	  sql = "Insert into  user_table  (Login, Password, Administrator, Registration_date, Name, Last_name, Age, Gender) values (?, ?, 'N', ?, ?, ?, ?, ?)";
-			  pstm = conn.prepareStatement(sql);	      
-		      pstm.setString(1, user.getUserName());
-		      pstm.setString(2, user.getPassword());
-		      pstm.setString(3, String.valueOf(user.getRegistrationDate().toEpochDay()));
-		      pstm.setString(4, user.getName());
-		      pstm.setString(5, user.getLastName());
-		      pstm.setString(6, String.valueOf(user.getBirthday().toEpochDay()));
-		      pstm.setString(7, user.getGender());      
-		      pstm.executeUpdate();
-		      
-		      sql = "Select a.id, a.Login from user_table a where a.Login=?";   
-		      pstm = conn.prepareStatement(sql);
-		      pstm.setString(1, user.getUserName());
-		      rs = pstm.executeQuery();
-		      
-		      String favoriteBookListName = null;
-		      
-		      if (rs.next()) {
-		    	  favoriteBookListName = rs.getString("id") + rs.getString("Login");	  
-		      }
-			  
-			  if (!favoriteBookListName.isEmpty()) {
-				  sql = "CREATE TABLE " + favoriteBookListName + "(id VARCHAR(13))";      
-				  pstm = conn.prepareStatement(sql); 
-				  pstm.executeUpdate();
-			  }  
-		  }
-	}
-	  
-	public static void deleteUser(Connection conn, String userName) throws SQLException {
-		
-		  String sql = "Delete From `bdlibraryphoenix`.`user_table` WHERE `Login`=?";	 
-		  PreparedStatement pstm = conn.prepareStatement(sql);
-		  pstm.setString(1, userName);
-		  pstm.executeUpdate();	  
-	}
-	
-	public static List<Book> queryBookList(Connection conn) throws SQLException {
-      String sql = "Select a.ID, a.Name, a.Author, a.Publication_date, a.Date_of_receipt, a.Short_description, a.Number_of_pages from books_table a ";
- 
-      PreparedStatement pstm = conn.prepareStatement(sql); 
-      ResultSet rs = pstm.executeQuery();
-      
-      List<Book> list = new ArrayList<Book>();
-      
-      while (rs.next()) {
+    public static List<User> queryUserList(Connection conn) throws SQLException {
+        String sql = "SELECT id, login, password, administrator, registration_date, name, last_name, age, gender, favorite_books_bdname FROM db_users";
+        PreparedStatement statement = conn.prepareStatement(sql);
+        ResultSet rs = statement.executeQuery();
+        return getUsersListByRs(rs);
+    }
 
-          Book book = new Book();
-          book.setId(rs.getString("ID"));
-          book.setName(rs.getString("Name"));
-          book.setAuthor(rs.getString("Author"));
-          book.setPublicationDate(rs.getInt("Publication_date"));
-          book.setDateOfReceipt(rs.getLong("Date_of_receipt"));
-          book.setShortDescription(rs.getString("Short_description"));
-          book.setNumberOfPages(rs.getInt("Number_of_pages"));
-          
-          list.add(book);
-      }
-      return list;
-  }
-	
-	public static List<String> queryFavoriteBookIdList(Connection conn, HttpServletRequest request) throws SQLException {
-	  
-		List<String> list = new ArrayList<String>();
-	  
-		HttpSession session = request.getSession();
-		UserAccount user = (UserAccount) session.getAttribute("loginedUser");		
-		String favoriteBookListName = user.getId() + user.getUserName();
-		
-		String sql = "Select a.id from " + favoriteBookListName + " a  ";
-		PreparedStatement pstm = conn.prepareStatement(sql);
-		ResultSet rs = pstm.executeQuery();
-		
-		while (rs.next()) {
-			list.add(rs.getString("id"));
-		}
-	  
-		return list;
-	}
-	
-	public static void addToFavorites(Connection conn, String id, HttpServletRequest request) throws SQLException {
-		
-	  // имя избранной бд книг = id юзера + логин юзера
-	  HttpSession session = request.getSession();
-	  UserAccount user = (UserAccount) session.getAttribute("loginedUser");
-	  String favoriteBookListName = user.getId() + user.getUserName();
-	        
-      String sql = "Insert into " + favoriteBookListName + " (id) values (?)";
-      PreparedStatement pstm = conn.prepareStatement(sql);
-      pstm.setString(1, id);
-      pstm.executeUpdate();      
-	}
-  
-	public static void removeFromFavorites(Connection conn, String id, HttpServletRequest request) throws SQLException {
-		
-	  // имя избранной бд книг = id юзера + логин юзера
-	  HttpSession session = request.getSession();
-	  UserAccount user = (UserAccount) session.getAttribute("loginedUser");
-	  String favoriteBookListName = user.getId() + user.getUserName();
-	  
-	  String sql = "Delete From " + favoriteBookListName + " where id= ?";      
-      PreparedStatement pstm = conn.prepareStatement(sql); 
-      pstm.setString(1, id);
-      pstm.executeUpdate();
-  }
-	
-	public static List<Book> searchInBookList(Connection conn, String searchingPhrase) throws SQLException {
-      String sql = "Select a.ID, a.Name, a.Author, a.Publication_date, a.Date_of_receipt, a.Short_description, a.Number_of_pages from books_table a "
-      		+ "WHERE a.Name LIKE \"%" + searchingPhrase + "%\" OR a.Author LIKE \"%" + searchingPhrase + "%\" OR a.Publication_date LIKE \"%" + searchingPhrase + "%\" OR a.Short_description LIKE \"%" + searchingPhrase + "%\" ";
- 
-      PreparedStatement pstm = conn.prepareStatement(sql);      
-      ResultSet rs = pstm.executeQuery();
-      List<Book> list = new ArrayList<Book>();
-      while (rs.next()) {
+    public static User findUser(Connection conn, String userName, String password) throws SQLException {
+        String sql = "SELECT id, login, password, administrator, "
+                + "registration_date, name, last_name, age,  gender,  favorite_books_bdname FROM db_users "
+                + "WHERE login = ? AND password = ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, userName);
+        ps.setString(2, password);
+        ResultSet rs = ps.executeQuery();
+        return getUserByRs(rs, userName, password);
+    }
 
-          Book book = new Book();
-          book.setId(rs.getString("ID"));
-          book.setName(rs.getString("Name"));
-          book.setAuthor(rs.getString("Author"));
-          book.setPublicationDate(rs.getInt("Publication_date"));
-          book.setDateOfReceipt(rs.getLong("Date_of_receipt"));
-          book.setShortDescription(rs.getString("Short_description"));
-          book.setNumberOfPages(rs.getInt("Number_of_pages"));
-          
-          list.add(book);
-      }
-      return list;
-  }
+    public static User findUser(Connection conn, String id) throws SQLException {
+        String sql = "SELECT id, login, password, administrator, registration_date, name, last_name, age,  gender,  favorite_books_bdname " +
+                "FROM db_users WHERE id = ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setInt(1, Integer.parseInt(id));
+        ResultSet rs = ps.executeQuery();
+        return getUserByRs(rs);
+    }
+
+    public static void saveOrUpdateUser(Connection conn, User user) throws SQLException {
+
+        String sql = "SELECT login FROM db_users WHERE login = ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, user.getUserName());
+        ResultSet rs = ps.executeQuery();
+        saveOrUpdateUser(conn, user, rs);
+    }
+
+    private static void saveOrUpdateUser(Connection conn, User user, ResultSet rs) throws SQLException {
+        String sql;
+        PreparedStatement ps;
+        boolean isUserExist = rs.next();
+
+        if (isUserExist) {
+            updateUser(conn, user);
+        } else {
+            saveUser(conn, user);
+            createTableForFavoriteBooks(conn, user);
+        }
+    }
+
+    public static void deleteUser(Connection conn, String userName) throws SQLException {
+        String sql = "DELETE FROM db_users WHERE login=?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, userName);
+        ps.executeUpdate();
+    }
+
+    public static List<Book> queryBookList(Connection conn) throws SQLException {
+        String sql = "SELECT id, name, author, publication_date, date_of_receipt, short_description, number_of_pages FROM db_books";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+        return getBooksListByRs(rs);
+    }
+
+    public static List<String> queryFavoriteBookIdList(Connection conn, HttpServletRequest request) throws SQLException {
+        User user = (User) request.getSession().getAttribute("loginedUser");
+        String favoriteBookListName = "db_" + user.getId() + user.getUserName().toLowerCase();
+        String sql = "SELECT id FROM " + favoriteBookListName + " ORDER BY id";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+        return getIdsListByRs(rs);
+    }
+
+    public static void addToFavorites(Connection conn, String id, HttpServletRequest request) throws SQLException {
+        User user = (User) request.getSession().getAttribute("loginedUser");
+        String favoriteBookListName = "db_" + user.getId() + user.getUserName().toLowerCase();
+        String sql = "INSERT INTO " + favoriteBookListName + " (id) VALUES (?)";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, id);
+        ps.executeUpdate();
+    }
+
+    public static void removeFromFavorites(Connection conn, String id, HttpServletRequest request) throws SQLException {
+        User user = (User) request.getSession().getAttribute("loginedUser");
+        String favoriteBookListName = "db_" + user.getId() + user.getUserName().toLowerCase();
+        String sql = "DELETE FROM " + favoriteBookListName + " WHERE id= ?";
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ps.setString(1, id);
+        ps.executeUpdate();
+    }
+
+    public static List<Book> searchInBookList(Connection conn, String searchingPhrase) throws SQLException {
+        String sql = "Select id, name, author, publication_date, date_of_receipt, short_description, number_of_pages from db_books "
+                + "WHERE name ILIKE '%" + searchingPhrase + "%' OR author ILIKE '%" + searchingPhrase +
+                "%' OR short_description ILIKE '%" + searchingPhrase + "%' OR publication_date::VARCHAR ILIKE '%" + searchingPhrase + "%'";//
+        PreparedStatement ps = conn.prepareStatement(sql);
+        ResultSet rs = ps.executeQuery();
+        return getBooksListByRs(rs);
+    }
+
+    private static User getUserByRs(ResultSet rs, String userName, String password) throws SQLException {
+        if (rs.next()) {
+            User user = new User();
+            user.setUserName(userName);
+            user.setPassword(password);
+            return fillUserCommonFieldsByRs(rs, user);
+        }
+        return null;
+    }
+
+    private static User getUserByRs(ResultSet rs) throws SQLException {
+        if (rs.next()) {
+            User user = new User();
+            user.setUserName(rs.getString("login"));
+            user.setPassword(rs.getString("password"));
+            return fillUserCommonFieldsByRs(rs, user);
+        }
+        return null;
+    }
+
+    private static User fillUserCommonFieldsByRs(ResultSet rs, User user) throws SQLException {
+        user.setId(String.valueOf(rs.getInt("id")));
+        user.setAdministrator(rs.getBoolean("administrator") ? "Y" : "N");
+        user.setRegistrationDate(rs.getInt("registration_date"));
+        user.setName(rs.getString("name"));
+        user.setLastName(rs.getString("last_name"));
+        user.setBirthday(rs.getLong("age"));
+        user.setGender(rs.getString("gender"));
+        user.setFavoriteBooksBdName(rs.getString("favorite_books_bdname"));
+        return user;
+    }
+
+    private static List<User> getUsersListByRs(ResultSet rs) throws SQLException {
+        List<User> list = new ArrayList<>();
+        while (rs.next()) {
+            User user = new User();
+            user.setId(String.valueOf(rs.getInt("id")));
+            user.setUserName(rs.getString("login"));
+            user.setPassword(rs.getString("password"));
+            user.setAdministrator(rs.getBoolean("administrator") ? "Y" : "N");
+            user.setRegistrationDate(rs.getLong("registration_date"));
+            user.setName(rs.getString("name"));
+            user.setLastName(rs.getString("last_name"));
+            user.setBirthday(rs.getLong("age"));
+            user.setGender(rs.getString("gender"));
+            list.add(user);
+        }
+        return list;
+    }
+
+    private static void saveUser(Connection conn, User user) throws SQLException {
+        String sql;
+        PreparedStatement ps;
+        sql = "INSERT INTO  db_users  (login, password, administrator, registration_date, name, last_name, age, gender) VALUES (?, ?, FALSE , ?, ?, ?, ?, ?)";
+        ps = conn.prepareStatement(sql);
+        ps.setString(1, user.getUserName());
+        ps.setString(2, user.getPassword());
+        ps.setLong(3, user.getRegistrationDate().toEpochDay());
+        ps.setString(4, user.getName());
+        ps.setString(5, user.getLastName());
+        ps.setLong(6, user.getBirthday().toEpochDay());
+        ps.setString(7, user.getGender());
+        ps.executeUpdate();
+    }
+
+    private static void updateUser(Connection conn, User user) throws SQLException {
+        String sql;
+        PreparedStatement ps;
+        sql = "UPDATE db_users SET password=?, name=?, last_name=?, age=?, gender=? WHERE login=?";
+        ps = conn.prepareStatement(sql);
+        ps.setString(1, user.getPassword());
+        ps.setString(2, user.getName());
+        ps.setString(3, user.getLastName());
+        ps.setLong(4, user.getBirthday().toEpochDay());
+        ps.setString(5, user.getGender());
+        ps.setString(6, user.getUserName());
+        ps.executeUpdate();
+    }
+
+    private static void createTableForFavoriteBooks(Connection conn, User user) throws SQLException {
+        String sql;
+        PreparedStatement ps;
+        ResultSet rs;
+        sql = "SELECT id, login FROM db_users WHERE login=?";
+        ps = conn.prepareStatement(sql);
+        ps.setString(1, user.getUserName());
+        rs = ps.executeQuery();
+
+        if (rs.next()) {
+            String favoriteBookListName = "db_" + rs.getString("id") + rs.getString("login");
+            sql = "CREATE TABLE " + favoriteBookListName + " (id VARCHAR(13))";
+            ps = conn.prepareStatement(sql);
+            ps.executeUpdate();
+        }
+    }
+
+    private static List<Book> getBooksListByRs(ResultSet rs) throws SQLException {
+        List<Book> list = new ArrayList<>();
+        while (rs.next()) {
+            Book book = new Book();
+            book.setId(String.valueOf(rs.getInt("id")));
+            book.setName(rs.getString("name"));
+            book.setAuthor(rs.getString("author"));
+            book.setPublicationDate(rs.getInt("publication_date"));
+            book.setDateOfReceipt(rs.getLong("date_of_receipt"));
+            book.setShortDescription(rs.getString("short_description"));
+            book.setNumberOfPages(rs.getInt("number_of_pages"));
+            list.add(book);
+        }
+        return list;
+    }
+
+    private static List<String> getIdsListByRs(ResultSet rs) throws SQLException {
+        List<String> list = new ArrayList<>();
+        while (rs.next()) {
+            list.add(rs.getString("id"));
+        }
+        return list;
+    }
 }
