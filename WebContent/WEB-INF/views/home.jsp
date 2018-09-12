@@ -4,16 +4,20 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>User Info</title>
+    <title>Home Page</title>
 </head>
 <body>
 
 <jsp:include page="_header.jsp"/>
 <jsp:include page="_menu.jsp"/>
 
-<h3>Подтверждение удаления!</h3>
+<h3>Library "Phoenix"</h3>
 
-Удалить пользователя ${userNameForDeleting}: <a href="deleteUser">подтвердить</a>
+<b>Сайт библиотеки "Феникс"</b><br><br>
+
+Новости:<br><br>
+
+Объявления:<br><br>
 
 <jsp:include page="_footer.jsp"/>
 
